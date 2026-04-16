@@ -1,16 +1,192 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from "react-router-dom";
+import { Building2, Plane, Star, ArrowRight, Tag } from "lucide-react";
+import { motion } from "framer-motion";
+import Layout from "@/components/Layout";
+import { hotels, promos, formatCurrency } from "@/data/dummyData";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const heroBanners = [
+  {
+    title: "Liburan Hemat ke Bali",
+    subtitle: "Diskon hingga 50% untuk hotel & pesawat",
+    bg: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&h=500&fit=crop",
+  },
+  {
+    title: "Weekend Getaway",
+    subtitle: "Mulai dari Rp 350.000",
+    bg: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=500&fit=crop",
+  },
+];
+
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <Layout>
+      {/* Hero */}
+      <section className="relative h-[320px] md:h-[420px] overflow-hidden">
+        <img
+          src={heroBanners[0].bg}
+          alt="Hero"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 to-foreground/20" />
+        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl md:text-5xl font-bold text-white mb-2"
+          >
+            {heroBanners[0].title}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-lg md:text-xl text-white/90 mb-6"
+          >
+            {heroBanners[0].subtitle}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex gap-3"
+          >
+            <Button asChild size="lg" className="rounded-full font-semibold">
+              <Link to="/hotels">
+                <Building2 className="w-4 h-4 mr-1" /> Cari Hotel
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="rounded-full font-semibold">
+              <Link to="/flights">
+                <Plane className="w-4 h-4 mr-1" /> Cari Pesawat
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Quick Search Tabs */}
+      <section className="container mx-auto px-4 -mt-8 relative z-10 mb-10">
+        <Card className="shadow-lg">
+          <CardContent className="p-4 md:p-6">
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                to="/hotels"
+                className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-primary hover:bg-traveloka-blue-light transition-all group"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20">
+                  <Building2 className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Hotel</p>
+                  <p className="text-xs text-muted-foreground">Cari & pesan hotel</p>
+                </div>
+              </Link>
+              <Link
+                to="/flights"
+                className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-primary hover:bg-traveloka-blue-light transition-all group"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20">
+                  <Plane className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Pesawat</p>
+                  <p className="text-xs text-muted-foreground">Tiket penerbangan</p>
+                </div>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Popular Hotels */}
+      <section className="container mx-auto px-4 mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Hotel Populer</h2>
+          <Link to="/hotels" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
+            Lihat Semua <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {hotels.slice(0, 3).map((hotel) => (
+            <Link key={hotel.id} to={`/hotels/${hotel.id}`}>
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow group">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={hotel.image}
+                    alt={hotel.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-3 right-3 bg-traveloka-orange text-white text-xs font-bold px-2 py-1 rounded-full">
+                    {Math.round(((hotel.originalPrice - hotel.price) / hotel.originalPrice) * 100)}% OFF
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-foreground truncate">{hotel.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-2">{hotel.city}</p>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="w-4 h-4 fill-traveloka-orange text-traveloka-orange" />
+                    <span className="text-sm font-medium">{hotel.rating}</span>
+                    <span className="text-xs text-muted-foreground">({hotel.reviews} ulasan)</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs text-muted-foreground line-through">
+                      {formatCurrency(hotel.originalPrice)}
+                    </span>
+                    <span className="text-primary font-bold">
+                      {formatCurrency(hotel.price)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">/malam</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Promo Section */}
+      <section className="container mx-auto px-4 mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-2">
+            <Tag className="w-5 h-5 text-traveloka-orange" /> Promo Terkini
+          </h2>
+          <Link to="/promos" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
+            Lihat Semua <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
+          {promos.slice(0, 4).map((promo) => (
+            <Link
+              key={promo.id}
+              to="/promos"
+              className="snap-start min-w-[280px] md:min-w-[320px] flex-shrink-0"
+            >
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative h-36">
+                  <img
+                    src={promo.image}
+                    alt={promo.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full">
+                    {promo.discount}
+                  </div>
+                </div>
+                <CardContent className="p-3">
+                  <h3 className="font-semibold text-sm text-foreground truncate">{promo.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{promo.description}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </Layout>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
