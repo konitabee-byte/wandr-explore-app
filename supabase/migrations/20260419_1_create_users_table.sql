@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   country VARCHAR(100),
   
   -- Account information
-  role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'driver', 'admin', 'super_admin', 'moderator', 'analyst')),
+  role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'driver', 'admin', 'super_admin')),
   status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended', 'banned')),
   
   -- Verification status

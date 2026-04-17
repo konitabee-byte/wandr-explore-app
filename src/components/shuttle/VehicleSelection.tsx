@@ -3,7 +3,7 @@ import { useShuttle } from '../../context/ShuttleContext';
 import { shuttleVehicles } from '../../data/shuttleModule';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Car, ArrowLeft, Users, Briefcase, Zap } from 'lucide-react';
+import { Car, ArrowLeft, Briefcase, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -28,7 +28,7 @@ export const VehicleSelection: React.FC = () => {
       <div className="space-y-4">
         {vehicles.map((vhc) => (
           <Card 
-            key={vhc.type} 
+            key={vhc.id} 
             className="cursor-pointer hover:border-primary transition-all border-2"
             onClick={() => setVehicle(vhc)}
           >
@@ -40,7 +40,6 @@ export const VehicleSelection: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-xl">{vhc.type}</h3>
-                    <p className="text-xs text-muted-foreground">Kapasitas Maksimal {vhc.capacity} Penumpang</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -49,11 +48,7 @@ export const VehicleSelection: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col items-center gap-1 p-2 bg-muted/30 rounded-lg">
-                  <Users className="w-4 h-4 text-primary" />
-                  <p className="text-[10px] font-bold">{vhc.capacity} Kursi</p>
-                </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col items-center gap-1 p-2 bg-muted/30 rounded-lg">
                   <Briefcase className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-bold">Bagasi Luas</p>

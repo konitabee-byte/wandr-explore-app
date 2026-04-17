@@ -61,11 +61,15 @@ export const BookingSuccess: React.FC = () => {
                     <p className="text-xs uppercase font-bold tracking-widest">Kursi</p>
                  </div>
                  <div className="flex justify-end gap-1 flex-wrap">
-                    {state.selectedSeats.map(id => (
-                      <Badge key={id} className="bg-primary text-white text-sm px-3 rounded-lg">
-                        {state.selectedVehicle?.layout.seats.find(s => s.id === id)?.label}
-                      </Badge>
-                    ))}
+                    {state.selectedSeats.length > 0 ? (
+                      state.selectedSeats.map(id => (
+                        <Badge key={id} className="bg-primary text-white text-sm px-3 rounded-lg">
+                          {id.substring(0, 3)} {/* Fallback for display */}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-xs">Dikonfirmasi</p>
+                    )}
                  </div>
               </div>
            </div>

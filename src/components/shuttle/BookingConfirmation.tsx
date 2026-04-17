@@ -36,16 +36,26 @@ export const BookingConfirmation: React.FC = () => {
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Layanan</p>
               <Badge variant="secondary">{state.selectedService?.tier}</Badge>
             </div>
+            <div className="space-y-1 text-right">
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Kursi</p>
+              <div className="flex justify-end gap-1 flex-wrap">
+                {state.selectedSeats.map((id, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-[10px] px-2">
+                    {id.substring(0, 3)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Titik Jemput</p>
               <p className="font-bold text-sm">{state.selectedPickupPoint?.name}</p>
             </div>
             <div className="space-y-1 text-right">
-              <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Kursi</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Penumpang</p>
               <div className="flex justify-end gap-1 flex-wrap">
-                {state.selectedSeats.map(id => (
-                  <Badge key={id} variant="outline" className="text-[10px] px-2">
-                    {state.selectedVehicle?.layout.seats.find(s => s.id === id)?.label}
+                {state.passengerCounts.map((p, idx) => (
+                  <Badge key={idx} variant="outline" className="text-[10px] px-2 capitalize">
+                    {p.count} {p.category}
                   </Badge>
                 ))}
               </div>
@@ -83,8 +93,8 @@ export const BookingConfirmation: React.FC = () => {
             {state.fareBreakdown && (
               <div className="space-y-1 text-xs text-muted-foreground border-b border-muted-foreground/10 pb-2 mb-2">
                 <div className="flex justify-between">
-                  <span>Base Fare ({state.fareBreakdown.baseFare} x {state.selectedSeats.length || 1})</span>
-                  <span>{state.fareBreakdown.baseFare * (state.selectedSeats.length || 1)} IDR</span>
+                  <span>Base Fare ({state.fareBreakdown.baseFare} x {state.passengerCounts.reduce((acc, p) => acc + p.count, 0)})</span>
+                  <span>{state.fareBreakdown.baseFare * state.passengerCounts.reduce((acc, p) => acc + p.count, 0)} IDR</span>
                 </div>
                 {state.fareBreakdown.distanceFare > 0 && (
                   <div className="flex justify-between">

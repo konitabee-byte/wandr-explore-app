@@ -29,6 +29,8 @@ const initialState: ShuttleBookingState = {
   selectedService: null,
   selectedVehicle: null,
   selectedSeats: [],
+  occupiedSeats: [],
+  currentLayout: null,
   passengerCounts: [{ category: 'adult', count: 1 }],
   totalPrice: 0,
   fareBreakdown: null,
@@ -93,6 +95,22 @@ export const ShuttleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setState(prev => ({ ...prev, selectedSchedule: schedule, step: 3 }));
   };
 
+  // Fetch occupied seats when schedule or vehicle changes
+  useEffect(() => {
+    const fetchOccupiedSeats = async () => {
+      if (state.selectedSchedule && state.selectedVehicle) {
+        // Simulate API call to fetch booked seats for this schedule/vehicle
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Mocking some occupied seats for demo
+        const mockOccupied = ['seat-1', 'seat-5']; 
+        setState(prev => ({ ...prev, occupiedSeats: mockOccupied }));
+      }
+    };
+
+    fetchOccupiedSeats();
+  }, [state.selectedSchedule, state.selectedVehicle]);
+
   const setPickupPoint = (point: PickupPoint) => {
     setState(prev => ({ ...prev, selectedPickupPoint: point, step: 4 }));
   };
@@ -107,14 +125,17 @@ export const ShuttleProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const toggleSeat = (seatId: string) => {
     setState(prev => {
+      // Prevent selecting occupied seats
+      if (prev.occupiedSeats.includes(seatId)) {
+        return prev;
+      }
+
       const isSelected = prev.selectedSeats.includes(seatId);
-      const newSeats = isSelected 
+      const newSelected = isSelected 
         ? prev.selectedSeats.filter(id => id !== seatId)
         : [...prev.selectedSeats, seatId];
       
-      // Sync passenger counts with seat selection if needed
-      // For now, we'll just update the total seats
-      return { ...prev, selectedSeats: newSeats };
+      return { ...prev, selectedSeats: newSelected };
     });
   };
 

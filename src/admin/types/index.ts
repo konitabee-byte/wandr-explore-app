@@ -202,7 +202,6 @@ export interface ShuttleBooking {
   shuttle_id: string;
   route_id: string;
   schedule_id: string;
-  seat_number: number;
   boarding_point: string;
   alighting_point: string;
   status: 'booked' | 'completed' | 'canceled';
@@ -211,6 +210,50 @@ export interface ShuttleBooking {
   travel_date: string;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================================================
+// SEAT LAYOUT MANAGER
+// ============================================================================
+
+export interface SeatCategory {
+  id: string;
+  name: string;
+  color: string;
+  base_price_multiplier: number;
+}
+
+export interface Seat {
+  id: string;
+  layout_id: string;
+  seat_number: string;
+  category_id: string;
+  x_pos: number; // Percentage 0-100
+  y_pos: number; // Percentage 0-100
+  status: 'available' | 'reserved' | 'blocked';
+  price_override?: number;
+  seat_length?: number; // in meters
+  seat_width?: number;  // in meters
+  seat_height?: number; // in meters
+}
+
+export interface SeatLayout {
+  id: string;
+  name: string;
+  base_map_url: string;
+  status: 'draft' | 'published';
+  created_at: string;
+  updated_at: string;
+  seats?: Seat[];
+}
+
+export interface LayoutHistory {
+  id: string;
+  layout_id: string;
+  changed_by: string;
+  change_description: string;
+  snapshot: any; // JSON representation of the layout at that time
+  created_at: string;
 }
 
 // ============================================================================

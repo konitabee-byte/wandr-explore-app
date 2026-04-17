@@ -97,8 +97,6 @@ export const RideSelection = ({
                       <p className="text-[11px] text-muted-foreground font-bold flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {route?.duration || 15} mnt
                       </p>
-                      <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                      <p className="text-[11px] text-muted-foreground font-bold">{ride.capacity} Kursi</p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">

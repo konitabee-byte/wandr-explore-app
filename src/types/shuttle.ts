@@ -23,7 +23,6 @@ export interface ShuttleSchedule {
   id: string;
   rayonId: string;
   departureTime: string;
-  availableSeats: number;
 }
 
 export interface ShuttleService {
@@ -33,23 +32,11 @@ export interface ShuttleService {
 }
 
 export interface ShuttleVehicle {
+  id: string;
   type: VehicleType;
   capacity: number;
-  layout: SeatLayout;
   basePrice: number;
-}
-
-export interface SeatLayout {
-  rows: number;
-  cols: number;
-  seats: SeatInfo[];
-}
-
-export interface SeatInfo {
-  id: string;
-  label: string;
-  isAvailable: boolean;
-  type: 'standard' | 'empty' | 'driver';
+  layout_id?: string;
 }
 
 export interface ShuttleBookingState {
@@ -60,6 +47,8 @@ export interface ShuttleBookingState {
   selectedService: ShuttleService | null;
   selectedVehicle: ShuttleVehicle | null;
   selectedSeats: string[];
+  occupiedSeats: string[]; // Track seats booked by others
+  currentLayout: any | null;
   passengerCounts: PassengerCount[];
   totalPrice: number;
   fareBreakdown: any | null; // Detailed calculation

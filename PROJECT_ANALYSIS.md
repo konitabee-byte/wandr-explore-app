@@ -76,7 +76,7 @@ src/
 │   │   ├── PickupPointSelection.tsx # Step 3: Choose pickup point
 │   │   ├── ServiceSelection.tsx    # Step 4: Choose service tier
 │   │   ├── VehicleSelection.tsx    # Step 5: Choose vehicle type
-│   │   ├── SeatSelection.tsx       # Step 6: Select seats with UI
+│   │   ├── SeatSelection.tsx       # Step 6: Select seats with Visual Map
 │   │   ├── BookingConfirmation.tsx # Step 7: Review & pay
 │   │   ├── BookingSuccess.tsx      # Step 9: Success screen
 │   │   ├── ShuttleCard.tsx         # Display shuttle options
@@ -198,7 +198,6 @@ src/
 - PickupPointSelection: Multiple pickup locations with distances
 - ServiceSelection: Regular/Semi-Executive/Executive tiers
 - VehicleSelection: Mini Car/SUV/Hiace with pricing
-- SeatSelection: 3D seat map UI with selection logic
 - BookingConfirmation: Order review + payment method selection
 - BookingSuccess: Ticket ID & booking confirmation
 
@@ -239,8 +238,8 @@ Fully integrated Radix UI based components for forms, dialogs, dropdowns, tabs, 
 - Up to 15 pickup points per rayon with distance metrics
 - Multiple departure schedules
 - 3 service tiers with multiplier-based pricing
-- 3 vehicle types with capacity & amenities
-- Seat selection with realistic cabin layout
+- 3 vehicle types with amenities
+- Visual seat selection with dynamic layout management
 - Real-time fare calculation with surge pricing
 - Round-trip discount support
 - Promo code application (3 codes available)
@@ -262,7 +261,7 @@ Fully integrated Radix UI based components for forms, dialogs, dropdowns, tabs, 
 3. Pickup Point Selection
 4. Service Tier Selection
 5. Vehicle Selection
-6. Seat Selection
+6. Seat Selection (Visual Map)
 7. Booking Confirmation + Payment
 8. (Blank)
 9. Success Screen
@@ -707,7 +706,6 @@ interface ShuttleSchedule {
   id: string;
   rayonId: string;
   departureTime: string;
-  availableSeats: number;
 }
 
 interface ShuttleService {
@@ -719,21 +717,7 @@ interface ShuttleService {
 interface ShuttleVehicle {
   type: VehicleType;
   capacity: number;
-  layout: SeatLayout;
   basePrice: number;
-}
-
-interface SeatLayout {
-  rows: number;
-  cols: number;
-  seats: SeatInfo[];
-}
-
-interface SeatInfo {
-  id: string;
-  label: string;
-  isAvailable: boolean;
-  type: 'standard' | 'empty' | 'driver';
 }
 
 interface ShuttleBookingState {
@@ -743,7 +727,6 @@ interface ShuttleBookingState {
   selectedPickupPoint: PickupPoint | null;
   selectedService: ShuttleService | null;
   selectedVehicle: ShuttleVehicle | null;
-  selectedSeats: string[];
   passengerCounts: PassengerCount[];
   totalPrice: number;
   fareBreakdown: FareCalculationResult | null;
@@ -881,7 +864,6 @@ interface ShuttleContextType {
   setPickupPoint: (point: PickupPoint) => void;
   setService: (service: ShuttleService) => void;
   setVehicle: (vehicle: ShuttleVehicle) => void;
-  toggleSeat: (seatId: string) => void;
   setPassengers: (passengers: PassengerCount[]) => void;
   setPromoCode: (code: string | null) => void;
   setRoundTrip: (isRoundTrip: boolean) => void;
@@ -1032,10 +1014,12 @@ App.tsx (Root)
 │   │   ├── PickupPointSelection.tsx
 │   │   ├── ServiceSelection.tsx
 │   │   ├── VehicleSelection.tsx
-│   │   ├── SeatSelection.tsx
 │   │   ├── BookingConfirmation.tsx
 │   │   │   └── Uses: Badge, Button, Card, Separator
 │   │   └── BookingSuccess.tsx
+│   │       ├── Props: {} (uses useShuttle)
+│   │       ├── Data: state.ticketId
+│   │       └── Actions: Can reset booking
 │   │
 │   ├── /ride → Ride.tsx
 │   │   ├── RideSearch.tsx

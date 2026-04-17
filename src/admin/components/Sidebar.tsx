@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Layout,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -65,6 +66,12 @@ const navSections: NavSection[] = [
         label: 'Shuttle Management',
         icon: <Bus size={20} />,
         path: '/admin/shuttles',
+      },
+      {
+        id: 'seat-layout',
+        label: 'Seat Layout',
+        icon: <Layout size={20} />,
+        path: '/admin/layout-editor',
       },
     ],
   },

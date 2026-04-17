@@ -1,16 +1,65 @@
-import React from 'react';
+/**
+ * Dynamic Seat Selection Component
+ * Renders the visual seat map for the customer booking flow
+ */
+
+import React, { useState, useEffect } from 'react';
 import { useShuttle } from '../../context/ShuttleContext';
-import { Badge } from '@/components/ui/badge';
-import { Armchair, ArrowLeft, CheckCircle2, CircleDot } from 'lucide-react';
+import { seatLayoutService } from '../../admin/services/seatLayoutService';
+import { SeatLayout, Seat } from '../../admin/types';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, CheckCircle2, Info, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SeatSelection: React.FC = () => {
-  const { state, toggleSeat, prevStep, nextStep } = useShuttle();
-  const vehicle = state.selectedVehicle;
-  const layout = vehicle?.layout;
+  const { state, toggleSeat, nextStep, prevStep } = useShuttle();
+  const [layout, setLayout] = useState<SeatLayout | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!layout) return null;
+  useEffect(() => {
+    const fetchLayout = async () => {
+      try {
+        const { data, error } = await seatLayoutService.getLayouts();
+        if (error) throw error;
+        
+        // Find the published layout
+        const published = data?.find(l => l.status === 'published');
+        
+        if (published) {
+          // Fetch full details with seats and categories
+          const { data: detail, error: detailError } = await seatLayoutService.getLayoutById(published.id);
+          if (detailError) throw detailError;
+          
+          console.log("Layout loaded:", detail.name, "Base Map URL:", detail.base_map_url ? "Present" : "Missing");
+          setLayout(detail);
+        } else {
+          console.warn("No published seat layout found.");
+          // Fallback: If no published layout, check if there are any layouts at all for debugging
+          if (data && data.length > 0) {
+             console.log("Found layouts but none are published:", data.map(l => `${l.name} (${l.status})`));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load layout:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLayout();
+  }, []);
+
+  if (loading) return <div className="text-center py-20">Memuat denah kursi...</div>;
+
+  if (!layout) return (
+    <div className="text-center py-20 space-y-4">
+      <Info className="w-12 h-12 mx-auto text-muted-foreground opacity-20" />
+      <p>Denah kursi belum tersedia untuk kendaraan ini.</p>
+      <Button onClick={nextStep}>Lanjutkan Tanpa Pilih Kursi</Button>
+    </div>
+  );
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
@@ -20,123 +69,122 @@ export const SeatSelection: React.FC = () => {
         </Button>
         <h2 className="text-xl font-bold">Pilih Kursi</h2>
       </div>
-      
-      <div className="max-w-md mx-auto">
-        {/* Realistic Cabin UI */}
-        <div className="relative bg-muted/30 rounded-[3rem] p-8 border-4 border-muted shadow-2xl overflow-hidden">
-          {/* Front Windshield */}
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-slate-400 to-transparent opacity-20 rounded-t-[3rem]" />
-          
-          {/* Dashboard Area */}
-          <div className="flex justify-center mb-10 pt-4">
-            <div className="w-full h-2 bg-slate-300 rounded-full opacity-50 max-w-[120px]" />
-          </div>
 
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          {/* Visual Map */}
           <div 
-            className="grid gap-y-6 gap-x-4 relative z-10"
+            className="relative bg-muted/20 rounded-[2rem] shadow-xl border overflow-hidden mx-auto flex items-center justify-center"
             style={{ 
-              gridTemplateColumns: `repeat(${layout.cols}, minmax(0, 1fr))` 
+              width: '100%', 
+              maxWidth: '600px',
+              aspectRatio: '4/3',
+              backgroundImage: layout.base_map_url ? `url(${layout.base_map_url})` : 'none',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundColor: layout.base_map_url ? 'white' : 'transparent'
             }}
           >
-            {layout.seats.map((seat) => {
-              if (seat.type === 'empty') {
-                return <div key={seat.id} className="aspect-square flex items-center justify-center">
-                  <div className="w-1.5 h-full bg-slate-200/50 rounded-full" /> {/* Aisle indicator */}
-                </div>;
-              }
-
+            {!layout.base_map_url && (
+              <div className="text-center p-8 space-y-2 opacity-30">
+                <ImageIcon className="w-12 h-12 mx-auto" />
+                <p className="text-xs font-medium">Gambar denah belum diatur oleh admin</p>
+              </div>
+            )}
+            
+            {layout.seats?.map((seat) => {
+              const isOccupied = state.occupiedSeats.includes(seat.id) || seat.status !== 'available';
               const isSelected = state.selectedSeats.includes(seat.id);
-              const isDriver = seat.type === 'driver';
-
+              
               return (
-                <motion.div 
+                <button
                   key={seat.id}
-                  whileTap={seat.isAvailable && !isDriver ? { scale: 0.9 } : {}}
+                  disabled={isOccupied}
+                  onClick={() => toggleSeat(seat.id)}
                   className={`
-                    relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all border-b-4
-                    ${isDriver 
-                      ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-default' 
-                      : isSelected 
-                        ? 'bg-primary border-primary-foreground/30 text-white shadow-lg -translate-y-1' 
-                        : seat.isAvailable 
-                          ? 'bg-white border-slate-200 hover:border-primary text-slate-600 shadow-sm cursor-pointer' 
-                          : 'bg-slate-50 border-slate-100 text-slate-200 cursor-not-allowed'}
+                    absolute rounded-lg flex items-center justify-center text-[10px] font-bold transition-all
+                    ${isSelected 
+                      ? 'bg-primary text-white scale-110 shadow-lg ring-4 ring-primary/20 z-10' 
+                      : !isOccupied 
+                        ? 'bg-white border-2 border-muted-foreground/20 hover:border-primary/50' 
+                        : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'}
                   `}
-                  onClick={() => seat.isAvailable && !isDriver && toggleSeat(seat.id)}
+                  style={{
+                    left: `${seat.x_pos}%`,
+                    top: `${seat.y_pos}%`,
+                    transform: 'translate(-50%, -50%)',
+                    // Apply dimensions for booking display (relative to 1.0m base)
+                    width: `${32 * (seat.seat_width || 1.0)}px`,
+                    height: `${32 * (seat.seat_length || 1.0)}px`
+                  }}
                 >
-                  {isDriver ? (
-                    <>
-                      <CircleDot className="w-8 h-8 animate-pulse" />
-                      <p className="text-[8px] font-black mt-1 uppercase tracking-tighter">DRIVER</p>
-                    </>
-                  ) : (
-                    <>
-                      <Armchair className={`w-7 h-7 ${isSelected ? 'animate-bounce' : ''}`} />
-                      <p className="text-[10px] font-bold mt-1">{seat.label}</p>
-                    </>
-                  )}
-                  
-                  {/* Seat availability dot */}
-                  {seat.isAvailable && !isDriver && !isSelected && (
-                    <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-pyu-go-green" />
-                  )}
-                </motion.div>
+                  {seat.seat_number}
+                </button>
               );
             })}
           </div>
-
-          {/* Rear Windshield */}
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-400 to-transparent opacity-10 rounded-b-[3rem]" />
         </div>
 
-        {/* Legend */}
-        <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs font-medium">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-lg bg-white border-2 border-slate-200 shadow-sm" />
-            <span className="text-slate-500">Tersedia</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-lg bg-primary shadow-sm border-b-2 border-primary-foreground/30" />
-            <span className="text-slate-500">Pilihan</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-lg bg-slate-50 border-2 border-slate-100" />
-            <span className="text-slate-500">Terisi</span>
+        <div className="space-y-6">
+          <Card className="rounded-3xl border-none shadow-lg">
+            <CardContent className="p-6 space-y-4">
+              <h3 className="font-bold">Ringkasan Pilihan</h3>
+              <div className="flex flex-wrap gap-2">
+                {state.selectedSeats.length > 0 ? (
+                  state.selectedSeats.map(id => {
+                    const s = layout.seats?.find(st => st.id === id);
+                    return (
+                      <Badge key={id} className="px-3 py-1 rounded-lg">
+                        Kursi {s?.seat_number}
+                      </Badge>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Belum ada kursi dipilih</p>
+                )}
+              </div>
+              
+              <div className="pt-4 border-t space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span>Total Kursi</span>
+                  <span className="font-bold">{state.selectedSeats.length}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold text-primary">
+                  <span>Estimasi Biaya</span>
+                  <span>{state.totalPrice.toLocaleString('id-ID')} IDR</span>
+                </div>
+              </div>
+
+              <Button 
+                className="w-full py-6 rounded-2xl font-bold" 
+                disabled={state.selectedSeats.length === 0}
+                onClick={nextStep}
+              >
+                Konfirmasi Kursi <CheckCircle2 className="w-4 h-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="bg-muted/30 p-4 rounded-2xl space-y-3">
+             <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Legenda</h4>
+             <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                   <div className="w-4 h-4 rounded bg-white border-2" />
+                   <span>Tersedia</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                   <div className="w-4 h-4 rounded bg-primary" />
+                   <span>Pilihan Anda</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                   <div className="w-4 h-4 rounded bg-muted opacity-50" />
+                   <span>Terisi / Tidak Tersedia</span>
+                </div>
+             </div>
           </div>
         </div>
       </div>
-
-      {/* Footer Info */}
-      <div className="p-5 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-4 shadow-inner">
-        <div className="flex justify-between items-center">
-           <div className="space-y-0.5">
-             <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Kursi Terpilih</p>
-             <p className="text-lg font-bold text-foreground">{state.selectedSeats.length} Kursi</p>
-           </div>
-           <div className="text-right space-y-0.5">
-             <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Total Bayar</p>
-             <p className="text-2xl font-black text-primary">{state.totalPrice.toLocaleString('id-ID')} IDR</p>
-           </div>
-        </div>
-        
-        {state.selectedSeats.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {state.selectedSeats.map(id => (
-              <Badge key={id} className="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 rounded-xl shadow-sm">
-                 No. {layout.seats.find(s => s.id === id)?.label}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <Button 
-        className="w-full py-8 rounded-[1.5rem] font-black text-xl shadow-2xl shadow-primary/30 transition-all active:scale-[0.98]" 
-        disabled={state.selectedSeats.length === 0}
-        onClick={nextStep}
-      >
-        Konfirmasi Pesanan <CheckCircle2 className="w-6 h-6 ml-2" />
-      </Button>
     </motion.div>
   );
 };

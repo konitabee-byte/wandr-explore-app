@@ -44,7 +44,7 @@
 | File | Types | Interfaces |
 |------|-------|-----------|
 | types/index.ts | 6 interfaces | Hotel, Shuttle, Ride, Promo, Booking, Room |
-| types/shuttle.ts | 9 interfaces | Rayon, Schedule, Service, Vehicle, SeatInfo, SeatLayout, State |
+| types/shuttle.ts | 7 interfaces | Rayon, Schedule, Service, Vehicle, State |
 | types/pricing.ts | 6 interfaces | FareRule, SurgeRule, PromoCode, FareCalculationResult, TransactionLog, PassengerCount |
 | types/maps.ts | 3 interfaces | GeoLocation, RouteInfo, GeocodingResult |
 
@@ -146,7 +146,6 @@ const renderStep = () => {
     case 3: return <PickupPointSelection />;
     case 4: return <ServiceSelection />;
     case 5: return <VehicleSelection />;
-    case 6: return <SeatSelection />;
     case 7: return <BookingConfirmation />;
     case 9: return <BookingSuccess />;
     default: return <RayonSelection />;
@@ -155,7 +154,7 @@ const renderStep = () => {
 
 // Progress indicator
 <div className="flex gap-2">
-  {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+  {[1, 2, 3, 4, 5, 7].map((s) => (
     <div 
       key={s} 
       className={`w-3 h-3 rounded-full ${state.step >= s ? 'bg-primary w-8' : 'bg-muted'}`} 
@@ -323,7 +322,7 @@ const debouncedCalculate = useCallback(
 );
 
 // Memoize expensive components
-const SeatSelection = memo(() => {...});
+const RayonSelection = memo(() => {...});
 
 // Lazy load pages
 const Hotels = lazy(() => import('./pages/Hotels'));
@@ -436,7 +435,6 @@ shuttle_bookings (extends bookings)
 ├── pickup_point_id
 ├── service_tier
 ├── vehicle_type
-├── selected_seats (JSONB array)
 ├── passengers (JSONB)
 ├── ticket_id
 ├── payment_method

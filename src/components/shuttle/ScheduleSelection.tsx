@@ -39,10 +39,7 @@ export const ScheduleSelection: React.FC = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs text-muted-foreground mb-1">Kursi Tersedia</p>
-                <Badge variant={sch.availableSeats > 5 ? "secondary" : "destructive"}>
-                  {sch.availableSeats} Sisa
-                </Badge>
+                <Badge variant="secondary">Tersedia</Badge>
               </div>
             </CardContent>
           </Card>

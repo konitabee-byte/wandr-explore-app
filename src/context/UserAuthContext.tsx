@@ -41,6 +41,14 @@ export const UserAuthProvider: React.FC<UserAuthProviderProps> = ({ children }) 
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
 
       if (authError) {
+        // If 401 or similar, clear session
+        if (authError.status === 401 || authError.status === 403) {
+          console.warn('Auth session invalid, clearing...', authError);
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
         throw new Error(authError.message);
       }
 
@@ -59,10 +67,20 @@ export const UserAuthProvider: React.FC<UserAuthProviderProps> = ({ children }) 
         .single();
 
       if (profileError) {
+        // If 401 or 403, the session might be invalid or RLS is blocking access
+        if (profileError.code === '401' || profileError.code === '403') {
+          console.error('Session invalid during profile fetch:', profileError);
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
+
         // If profile doesn't exist (404), try to create it
         if (profileError.code === 'PGRST116') {
           try {
-            const { error: createError } = await supabase
+            // Attempt to create profile
+            const { data: newProfile, error: createError } = await supabase
               .from('users')
               .insert({
                 id: authUser.id,
@@ -71,13 +89,26 @@ export const UserAuthProvider: React.FC<UserAuthProviderProps> = ({ children }) 
                 phone_number: authUser.user_metadata?.phone,
                 role: 'user',
                 status: 'active',
-              });
+              })
+              .select()
+              .single();
 
             if (createError) {
-              // 23505 = duplicate key (race condition, already created)
-              if (createError.code !== '23505') {
+              // 23505 or status 409 = duplicate key (race condition with DB trigger)
+              if (createError.code === '23505' || (createError as any).status === 409) {
+                console.log('Profile already exists (race condition), fetching again...');
+                // Fetch the existing profile that was just created by the trigger or another process
+                const { data: existingProfile } = await supabase
+                  .from('users')
+                  .select('*')
+                  .eq('id', authUser.id)
+                  .single();
+                userProfile = existingProfile;
+              } else {
                 console.warn('Could not create profile:', createError);
               }
+            } else {
+              userProfile = newProfile;
             }
           } catch (err) {
             console.warn('Profile creation failed:', err);

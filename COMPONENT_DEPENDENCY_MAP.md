@@ -51,9 +51,8 @@
                                  │ - RayonSelection         │  │ BookingItem
                                  │ - ScheduleSelection      │  │ Button    │
                                  │ - PickupPointSelection   │  └───────────┘
-                                 │ - ServiceSelection       │
-                                 │ - VehicleSelection       │
-                                 │ - SeatSelection          │
+                                 │ - ServiceSelection         │
+                                 │ - VehicleSelection         │
                                  │ - BookingConfirmation    │
                                  │ - BookingSuccess         │
                                  └─────────────────────────┘
@@ -112,14 +111,6 @@
 │     └─ triggers useEffect                                       │
 │        └─ calls FareService.getEstimate()                       │
 │           └─ applies vehicle multiplier in FareCalculator       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  SeatSelection                                                  │
-│  └─ onClick toggleSeat() → updates selectedSeats in context     │
-│     └─ NO fare recalc (seat count handled in passengers logic)  │
-│        but could tie to setPassengers()                         │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -339,7 +330,6 @@ Global/Context State:
 │   selectedPickupPoint: PickupPoint | null                      │
 │   selectedService: ShuttleService | null                       │
 │   selectedVehicle: ShuttleVehicle | null                       │
-│   selectedSeats: string[]                                      │
 │   passengerCounts: PassengerCount[]                            │
 │   totalPrice: number                                           │
 │   fareBreakdown: FareCalculationResult | null                  │

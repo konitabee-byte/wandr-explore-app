@@ -272,89 +272,44 @@ export const shuttleRayons: Rayon[] = [
 ];
 
 export const shuttleSchedules: ShuttleSchedule[] = [
-  { id: "sch-1", rayonId: "rayon-a", departureTime: "06:00", availableSeats: 12 },
-  { id: "sch-2", rayonId: "rayon-a", departureTime: "10:00", availableSeats: 8 },
-  { id: "sch-3", rayonId: "rayon-b", departureTime: "06:00", availableSeats: 15 },
-  { id: "sch-4", rayonId: "rayon-b", departureTime: "14:00", availableSeats: 4 },
-  { id: "sch-5", rayonId: "rayon-c", departureTime: "06:00", availableSeats: 10 },
-  { id: "sch-6", rayonId: "rayon-d", departureTime: "06:00", availableSeats: 14 },
+  { id: "sch-1", rayonId: "rayon-a", departureTime: "06:00" },
+  { id: "sch-2", rayonId: "rayon-a", departureTime: "10:00" },
+  { id: "sch-3", rayonId: "rayon-b", departureTime: "06:00" },
+  { id: "sch-4", rayonId: "rayon-b", departureTime: "14:00" },
+  { id: "sch-5", rayonId: "rayon-c", departureTime: "06:00" },
+  { id: "sch-6", rayonId: "rayon-d", departureTime: "06:00" },
 ];
 
 export const shuttleServices: ShuttleService[] = [
-  { tier: "Regular", amenities: ["AC", "Standard Seat"], priceMultiplier: 1.0 },
-  { tier: "Semi Executive", amenities: ["AC", "Comfort Seat", "Water"], priceMultiplier: 1.25 },
-  { tier: "Executive", amenities: ["AC", "Reclining Seat", "Water", "Snack", "WiFi"], priceMultiplier: 1.5 },
+  { tier: "Regular", amenities: ["AC"], priceMultiplier: 1.0 },
+  { tier: "Semi Executive", amenities: ["AC", "Water"], priceMultiplier: 1.25 },
+  { tier: "Executive", amenities: ["AC", "Water", "Snack", "WiFi"], priceMultiplier: 1.5 },
 ];
 
 export const shuttleVehicles: ShuttleVehicle[] = [
   { 
+    id: "vhc-minicar",
     type: "Mini Car", 
     capacity: 4, 
-    basePrice: 50000,
-    layout: { 
-      rows: 2, cols: 3, 
-      seats: [
-        { id: "s-d", label: "1", isAvailable: true, type: "standard" },
-        { id: "s-1", label: "", isAvailable: false, type: "empty" },
-        { id: "s-2", label: "D", isAvailable: true, type: "driver" },
-        { id: "s-3", label: "2", isAvailable: true, type: "standard" },
-        { id: "s-4", label: "3", isAvailable: true, type: "standard" },
-        { id: "s-5", label: "4", isAvailable: true, type: "standard" },
-      ]
-    }
+    basePrice: 50000
   },
   { 
+    id: "vhc-suv",
     type: "SUV", 
     capacity: 7, 
-    basePrice: 80000,
-    layout: { 
-      rows: 3, cols: 3, 
-      seats: [
-        { id: "s-1", label: "1", isAvailable: true, type: "standard" },
-        { id: "e-1", label: "", isAvailable: false, type: "empty" },
-        { id: "s-d", label: "D", isAvailable: true, type: "driver" },
-        { id: "s-2", label: "2", isAvailable: true, type: "standard" },
-        { id: "s-3", label: "3", isAvailable: true, type: "standard" },
-        { id: "s-4", label: "4", isAvailable: true, type: "standard" },
-        { id: "s-5", label: "5", isAvailable: true, type: "standard" },
-        { id: "s-6", label: "6", isAvailable: true, type: "standard" },
-        { id: "s-7", label: "7", isAvailable: true, type: "standard" },
-      ]
-    }
+    basePrice: 80000
   },
   { 
+    id: "vhc-hiace-14",
     type: "Hiace", 
     capacity: 14, 
-    basePrice: 180000,
-    layout: { 
-      rows: 5, cols: 4, 
-      seats: [
-        { id: "s-1", label: "1", isAvailable: true, type: "standard" },
-        { id: "e-1", label: "", isAvailable: false, type: "empty" },
-        { id: "e-2", label: "", isAvailable: false, type: "empty" },
-        { id: "s-1", label: "D", isAvailable: false, type: "driver" },
-        
-        { id: "e-2", label: "", isAvailable: false, type: "empty" },
-        { id: "s-4", label: "4", isAvailable: true, type: "standard" },
-        { id: "s-3", label: "3", isAvailable: true, type: "standard" },
-        { id: "s-2", label: "2", isAvailable: true, type: "standard" }, // Door Area
-        
-        { id: "s-7", label: "7", isAvailable: true, type: "standard" },
-        { id: "e-3", label: "", isAvailable: false, type: "empty" },
-        { id: "s-6", label: "6", isAvailable: true, type: "standard" }, // Aisle  
-        { id: "s-5", label: "5", isAvailable: true, type: "standard" },
-        
-        { id: "s-10", label: "10", isAvailable: true, type: "standard" },
-        { id: "e-4", label: "", isAvailable: false, type: "empty" },
-        { id: "s-9", label: "9", isAvailable: true, type: "standard" }, // Aisle
-        { id: "s-8", label: "8", isAvailable: true, type: "standard" },
-        
-        { id: "s-14", label: "14", isAvailable: true, type: "standard" },
-        { id: "s-13", label: "13", isAvailable: true, type: "standard" },
-        { id: "s-12", label: "12", isAvailable: true, type: "standard" },
-        { id: "s-11", label: "11", isAvailable: true, type: "standard" },
-      ]
-    }
+    basePrice: 180000
+  },
+  { 
+    id: "vhc-hiace-8",
+    type: "Hiace", 
+    capacity: 8, 
+    basePrice: 450000
   },
 ];
 

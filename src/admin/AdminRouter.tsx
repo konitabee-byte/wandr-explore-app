@@ -17,6 +17,7 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const Promos = lazy(() => import('./pages/Promos'));
 const Ads = lazy(() => import('./pages/Ads'));
 const Settings = lazy(() => import('./pages/Settings'));
+const SeatLayoutEditor = lazy(() => import('./pages/SeatLayoutEditor'));
 
 // Loading component
 const PageLoader = () => (
@@ -134,6 +135,16 @@ export const AdminRouter: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <Settings />
+            </Suspense>
+          }
+        />
+
+        {/* Seat Layout Editor */}
+        <Route
+          path="layout-editor"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <SeatLayoutEditor />
             </Suspense>
           }
         />
