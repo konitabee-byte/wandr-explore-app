@@ -22,7 +22,7 @@ const Promos: React.FC = () => {
       setLoading(true);
       setError(null);
       const data = await promoService.getPromos();
-      setPromos(data.data || []);
+      setPromos(data.data?.data || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch promos';
       setError(message);

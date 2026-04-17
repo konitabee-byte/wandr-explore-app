@@ -22,7 +22,7 @@ const Ads: React.FC = () => {
       setLoading(true);
       setError(null);
       const data = await adsService.getAds();
-      setAds(data.data || []);
+      setAds(data.data?.data || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch ads';
       setError(message);

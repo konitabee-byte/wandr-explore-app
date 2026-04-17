@@ -6,7 +6,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAdminAuth, AdminUser } from '../hooks/useAdminAuth';
+import { useAdminAuth } from '../hooks/useAdminAuth';
+import { AdminUser } from '../types/index';
 
 interface AdminContextType {
   isAdmin: boolean;

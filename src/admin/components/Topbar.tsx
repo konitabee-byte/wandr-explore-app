@@ -24,7 +24,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   const [notifications, setNotifications] = useState(3);
 
   // Use user from context if available
-  const userName = user?.fullName || propUserName || 'Admin User';
+  const userName = user?.name || propUserName || 'Admin User';
   const userRole = user?.role || propUserRole || 'Super Admin';
 
   const handleLogout = async () => {

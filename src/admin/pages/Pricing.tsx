@@ -22,7 +22,7 @@ const Pricing: React.FC = () => {
       setLoading(true);
       setError(null);
       const data = await pricingService.getPricingRules();
-      setPricingRules(data || []);
+      setPricingRules(data.data || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch pricing rules';
       setError(message);
@@ -112,7 +112,7 @@ const Pricing: React.FC = () => {
                     </td>
                     <td style={{ padding: '12px' }}>{rule.service_type}</td>
                     <td style={{ padding: '12px', fontWeight: '600' }}>
-                      {rule.rule_type === 'percentage' ? `${rule.value}%` : `IDR ${rule.value}`}
+                      {rule.rule_type === 'surge' ? `${rule.value}x` : `IDR ${rule.value}`}
                     </td>
                     <td style={{ padding: '12px' }}>
                       <span
@@ -120,11 +120,11 @@ const Pricing: React.FC = () => {
                           padding: '4px 8px',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          backgroundColor: rule.is_active ? '#d1fae5' : '#f3f4f6',
-                          color: rule.is_active ? '#065f46' : '#374151',
+                          backgroundColor: rule.active ? '#d1fae5' : '#f3f4f6',
+                          color: rule.active ? '#065f46' : '#374151',
                         }}
                       >
-                        {rule.is_active ? 'Active' : 'Inactive'}
+                        {rule.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td style={{ padding: '12px' }}>
