@@ -34,7 +34,7 @@ const SeatLayoutEditor = () => {
   const [params] = useSearchParams();
   const vehicleId = params.get("vehicle");
 
-  const [seats, setSeats] = useState<Seat[]>(() => getStoredSeats());
+  const [seats, setSeats] = useState<Seat[]>(() => (vehicleId ? [] : getStoredSeats()));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [vehicleName, setVehicleName] = useState<string>("");
