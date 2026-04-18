@@ -209,6 +209,38 @@ const SeatLayoutEditor = () => {
           </Button>
         </div>
 
+        {vehicleId && (
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-lg border bg-muted/30 overflow-hidden flex items-center justify-center shrink-0">
+                  {imageUrl ? (
+                    <img src={imageUrl} alt="Denah" className="w-full h-full object-contain" />
+                  ) : (
+                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">Denah Kendaraan</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {imageUrl ? "Klik untuk ganti gambar" : "Upload foto denah mobil (max 5MB)"}
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={handleUploadClick} disabled={uploading}>
+                  <Upload className="w-4 h-4" /> {uploading ? "..." : imageUrl ? "Ganti" : "Upload"}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileSelected}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="mb-4">
           <CardContent className="p-4">
             <p className="text-xs text-center text-muted-foreground mb-3">
@@ -219,6 +251,7 @@ const SeatLayoutEditor = () => {
               selectedId={selectedId}
               onSelect={setSelectedId}
               onMove={handleMove}
+              baseImageUrl={imageUrl}
             />
           </CardContent>
         </Card>
