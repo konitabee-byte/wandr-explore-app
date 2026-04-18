@@ -56,7 +56,7 @@ const SeatEditor = ({ seats, selectedId, onSelect, onMove, baseImageUrl, disable
     }
   };
 
-  const containerStyle = aspectRatio && baseImageUrl
+  const containerStyle = aspectRatio && hasImage
     ? { aspectRatio: `${aspectRatio}` }
     : undefined;
 
@@ -66,21 +66,26 @@ const SeatEditor = ({ seats, selectedId, onSelect, onMove, baseImageUrl, disable
       style={containerStyle}
       className={cn(
         "relative w-full max-w-[320px] mx-auto rounded-2xl overflow-hidden bg-muted/30 border touch-none",
-        !(aspectRatio && baseImageUrl) && "aspect-[1/2]",
+        !(aspectRatio && hasImage) && "aspect-[1/2]",
+        hasImage && !ready && "min-h-[400px]",
         disabled && "opacity-60 pointer-events-none",
       )}
     >
-      {baseImageUrl ? (
+      {hasImage ? (
         <img
-          src={baseImageUrl}
+          src={baseImageUrl!}
           alt="Denah kursi kendaraan"
           onLoad={(e) => {
             const img = e.currentTarget;
             if (img.naturalWidth && img.naturalHeight) {
               setAspectRatio(img.naturalWidth / img.naturalHeight);
             }
+            setImgLoaded(true);
           }}
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+          className={cn(
+            "absolute inset-0 w-full h-full object-contain pointer-events-none select-none transition-opacity",
+            imgLoaded ? "opacity-100" : "opacity-0",
+          )}
           draggable={false}
         />
       ) : (
@@ -88,6 +93,10 @@ const SeatEditor = ({ seats, selectedId, onSelect, onMove, baseImageUrl, disable
           <ImageOff className="w-10 h-10 opacity-50" />
           <p className="text-xs">Belum ada denah, upload dulu di panel atas</p>
         </div>
+      )}
+
+      {hasImage && !ready && (
+        <div className="absolute inset-0 animate-pulse bg-muted/50" />
       )}
 
       {draggingId && livePos && (
