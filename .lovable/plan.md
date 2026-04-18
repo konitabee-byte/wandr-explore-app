@@ -1,90 +1,81 @@
-
-## Rencana: Editor Posisi Kursi (Visual Drag & Drop)
+## Rencana: Dashboard Admin
 
 ### Tujuan
-Membuat halaman editor di mana Anda bisa **drag kursi** di atas denah Hiace untuk mengatur posisi yang realistis, lalu hasilnya bisa dipakai sebagai layout default user.
 
-### Pendekatan: Editor Lokal (tanpa DB)
-Karena scope project adalah UI Traveloka clone dan layout kursi hanya 1 jenis (Hiace), editor ini akan:
-- Menyimpan hasil edit ke **localStorage** (persisten di browser Anda)
-- Menyediakan tombol **"Export sebagai code"** → menghasilkan snippet TypeScript yang bisa di-paste ke `src/data/seatLayout.ts` agar jadi default permanen untuk semua user
+Buat area `/admin` terproteksi (hanya role `admin`) dengan layout sidebar, halaman setting, dan seat layout editor yang sudah ada dipindah ke admin.
 
-Ini menghindari kompleksitas database/RLS untuk fitur internal.
-
-### Halaman Baru: `/shuttle/editor`
+### Arsitektur
 
 ```text
-┌──────────────────────────────────┐
-│ ← Editor Layout Kursi            │
-├──────────────────────────────────┤
-│ [+ Tambah Kursi] [Reset] [Export]│
-├──────────────────────────────────┤
-│   ┌────────────────────┐         │
-│   │  [Denah Hiace]     │         │
-│   │  ▢ ← drag aku!     │         │
-│   │      ▢   ▢         │         │
-│   │  ▢   ▢   ▢         │         │  ← drag kursi
-│   │                    │         │     dengan mouse
-│   │  Klik kursi untuk  │         │     atau touch
-│   │  edit/hapus        │         │
-│   └────────────────────┘         │
-├──────────────────────────────────┤
-│ Kursi terpilih: 3B               │
-│ Label: [3B___]                   │
-│ X: [50%] Y: [48%]                │
-│ Status: ◉ available ○ occupied   │
-│ [Hapus Kursi]                    │
-├──────────────────────────────────┤
-│ [Simpan Perubahan]               │
-└──────────────────────────────────┘
+/admin                  → Dashboard (statistik)
+/admin/bookings         → Daftar semua booking user
+/admin/promos           → CRUD promo
+/admin/seat-editor      → Seat layout editor (pindah dari /shuttle/editor)
+/admin/users            → Daftar user + assign role
+/admin/settings         → Pengaturan profil admin & app
 ```
 
-### Implementasi Teknis
+Layout: sidebar kiri (collapsible) + topbar dengan tombol logout. Pakai shadcn Sidebar.
 
-**1. File baru: `src/lib/seatStorage.ts`**
-- Helper `loadSeats()` / `saveSeats()` ke localStorage
-- Helper `exportToCode(seats)` → generate string TypeScript
-- Update `src/data/seatLayout.ts` agar `HIACE_SEATS` di-load dari localStorage jika ada, fallback ke default
+### Implementasi
 
-**2. Komponen baru: `src/components/shuttle/SeatEditor.tsx`**
-- Mirip `SeatMap.tsx` tapi dengan drag handler
-- Pakai pointer events (`onPointerDown`, `onPointerMove`, `onPointerUp`) — support mouse + touch
-- Saat drag: update koordinat `x%, y%` berdasarkan posisi pointer relatif terhadap container (pakai `getBoundingClientRect()`)
-- Highlight kursi yang sedang aktif
-- Snap halus (tanpa grid, free positioning)
+**1. Role Guard**
 
-**3. Halaman baru: `src/pages/SeatLayoutEditor.tsx`**
-- Header sticky + tombol back
-- Toolbar: Tambah / Reset / Export
-- `<SeatEditor>` di tengah
-- Panel edit di bawah: ubah label, ubah status (available/occupied), hapus kursi
-- Tombol simpan → tulis ke localStorage + toast "Tersimpan"
-- Tombol export → tampilkan dialog dengan kode siap copy-paste
+- File baru `src/components/AdminRoute.tsx` — wrap children, cek `has_role(user.id, 'admin')` via Supabase. Kalau bukan admin → redirect ke `/`.
+- Tambah method `isAdmin` ke `UserAuthContext.tsx` (query `user_roles` saat login).
 
-**4. Routing: `src/App.tsx`**
-- Tambah route `/shuttle/editor` (protected, behind login)
+**2. Layout & Navigasi**
 
-**5. Akses dari Shuttle page**
-- Tambah ikon kecil "✏️ Edit Layout" di pojok header `/shuttle` agar mudah diakses
-- Atau lewat URL langsung `/shuttle/editor`
+- `src/components/admin/AdminSidebar.tsx` — Sidebar dengan menu: Dashboard, Bookings, Promos, Seat Editor, Users, Settings.
+- `src/components/admin/AdminLayout.tsx` — `SidebarProvider` + `AdminSidebar` + `<Outlet>` topbar.
 
-**6. Update `src/data/seatLayout.ts`**
-- Pisahkan: `DEFAULT_HIACE_SEATS` (constant) + `HIACE_SEATS` (computed dari localStorage atau default)
-- Halaman `/shuttle` tetap pakai `HIACE_SEATS` → otomatis ambil hasil edit
+**3. Halaman Admin**
 
-### UX Detail
-- Drag dengan **delay kecil** agar single-tap = select, hold + drag = pindah
-- Kursi yang sedang di-drag: scale 1.2 + shadow lebih kuat
-- Koordinat ditampilkan real-time saat drag (overlay di pojok)
-- Container max-width sama persis dengan `/shuttle` (280px) agar hasil edit akurat
-- Tombol "Tambah Kursi" → kursi baru muncul di tengah (50%, 50%) dengan label auto-increment
+- `src/pages/admin/Dashboard.tsx` — Cards statistik: total bookings, total users, total revenue, promo aktif. Query Supabase langsung.
+- `src/pages/admin/AdminBookings.tsx` — Table semua booking (admin bypass via service role tidak perlu — kita tambah RLS policy "admins can view all bookings").
+- `src/pages/admin/AdminPromos.tsx` — Table promo + dialog tambah/edit/hapus. CRUD ke tabel `promos` (sudah ada policy admin).
+- `src/pages/admin/AdminUsers.tsx` — List profiles + role-nya, tombol "Promote to admin" / "Demote".
+- `src/pages/admin/AdminSettings.tsx` — Form edit profile admin (nama, phone, avatar) + section "App Settings" (placeholder untuk maintenance mode toggle yang disimpan di localStorage).
+- Pindahkan `src/pages/SeatLayoutEditor.tsx` → tetap di tempat, tapi route lama `/shuttle/editor` dihapus dan diganti `/admin/seat-editor`. Akses dari header `/shuttle` (ikon pensil) hanya tampil jika `isAdmin`.
+- Tambahkan Multi-tenant / multi-vehicle layout editor.
+
+**4. Database Migration**
+Tambah RLS policies agar admin bisa lihat data semua user:
+
+```sql
+-- bookings: admin bisa lihat semua
+CREATE POLICY "Admins can view all bookings" ON bookings
+  FOR SELECT USING (has_role(auth.uid(), 'admin'));
+
+-- profiles: admin bisa lihat semua
+CREATE POLICY "Admins can view all profiles" ON profiles
+  FOR SELECT USING (has_role(auth.uid(), 'admin'));
+
+-- user_roles: admin sudah punya policy ALL, sudah cukup
+```
+
+**5. Routing (`src/App.tsx`)**
+
+- Tambah nested route `/admin/*` dibungkus `<AdminRoute><AdminLayout /></AdminRoute>`
+- Hapus route `/shuttle/editor`
+
+**6. Cara Jadi Admin**
+
+- Belum ada UI signup admin (security). User pertama jadi admin lewat:
+  - Buka SQL Editor di backend → `INSERT INTO user_roles (user_id, role) VALUES ('<your-uuid>', 'admin');`
+  - Atau saya bisa kasih tombol developer "Make me admin" di halaman Account (DEV ONLY) — tunggu konfirmasi Anda.
 
 ### Yang TIDAK Dibuat
-- Multi-vehicle support (hanya Hiace)
-- Save ke database (pakai localStorage)
-- Multi-user collaboration
-- Undo/redo history
-- Snap grid
+
+- Edit booking detail per user (read-only dulu)
+- Email notification system
+- Audit log
+- &nbsp;
 
 ### Hasil Akhir
-Anda buka `/shuttle/editor` → drag kursi-kursi sampai posisinya pas dengan denah → klik Simpan → buka `/shuttle` → user lihat layout yang sudah Anda atur. Untuk permanen di production: klik Export → copy snippet → paste ke `src/data/seatLayout.ts`.
+
+Admin login → otomatis lihat menu admin → kelola promo, lihat semua booking & user, edit layout kursi, atur profile. User biasa yang coba akses `/admin/*` langsung di-redirect.
+
+### Pertanyaan untuk Anda
+
+1. Apakah saya tambahkan tombol "Make me admin (DEV)" sementara di halaman Account agar Anda bisa testing? Jalankan SQL manual
