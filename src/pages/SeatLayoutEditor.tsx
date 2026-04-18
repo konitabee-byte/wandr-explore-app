@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Plus, RotateCcw, Code, Save, Trash2, Copy, Cloud, Upload, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, RotateCcw, Code, Save, Trash2, Copy, Cloud, Upload, Image as ImageIcon, Info, Car } from "lucide-react";
 import Layout from "@/components/Layout";
 import SeatEditor from "@/components/shuttle/SeatEditor";
 import { Card, CardContent } from "@/components/ui/card";
@@ -226,25 +226,54 @@ const SeatLayoutEditor = () => {
           </Button>
         </div>
 
+        {!vehicleId && (
+          <Card className="mb-4 border-primary/40 bg-primary/5">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex gap-3">
+                <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">Mode Lokal (tanpa kendaraan)</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Untuk upload denah & simpan ke database, buka editor dari halaman Vehicles dan pilih kendaraan dulu.
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" className="w-full">
+                <Link to="/admin/vehicles">
+                  <Car className="w-4 h-4" /> Buka Halaman Vehicles
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {vehicleId && (
           <Card className="mb-4">
             <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-lg border bg-muted/30 overflow-hidden flex items-center justify-center shrink-0">
-                  {imageUrl ? (
-                    <img src={imageUrl} alt="Denah" className="w-full h-full object-contain" />
-                  ) : (
-                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                  )}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-14 h-14 rounded-lg border bg-muted/30 overflow-hidden flex items-center justify-center shrink-0">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="Denah" className="w-full h-full object-contain" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">Denah Kendaraan</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {imageUrl ? "Klik untuk ganti gambar" : "Upload foto denah mobil (max 5MB)"}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">Denah Kendaraan</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {imageUrl ? "Klik untuk ganti gambar" : "Upload foto denah mobil (max 5MB)"}
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" onClick={handleUploadClick} disabled={uploading}>
-                  <Upload className="w-4 h-4" /> {uploading ? "..." : imageUrl ? "Ganti" : "Upload"}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleUploadClick}
+                  disabled={uploading}
+                  className="w-full sm:w-auto shrink-0"
+                >
+                  <Upload className="w-4 h-4" /> {uploading ? "Mengupload..." : imageUrl ? "Ganti Denah" : "Upload Denah"}
                 </Button>
                 <input
                   ref={fileInputRef}
