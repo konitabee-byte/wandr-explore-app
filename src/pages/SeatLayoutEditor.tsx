@@ -110,7 +110,10 @@ const SeatLayoutEditor = () => {
       return;
     }
     setImageUrl(publicUrl);
-    toast({ title: "Denah berhasil diupload" });
+    toast({
+      title: "Denah berhasil diupload",
+      description: "Periksa kembali posisi kursi terhadap denah baru.",
+    });
   };
 
   const selected = useMemo(
