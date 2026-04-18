@@ -138,13 +138,19 @@ const SeatLayoutEditor = () => {
   };
 
   const handleReset = () => {
-    if (!confirm("Reset ke layout default? Perubahan lokal akan hilang.")) return;
     if (vehicleId) {
+      if (!confirm("Reset semua kursi? Klik Simpan ke Database setelahnya untuk menerapkan.")) return;
       setSeats([]);
-    } else {
-      clearSeatsStorage();
-      setSeats(DEFAULT_HIACE_SEATS);
+      setSelectedId(null);
+      toast({
+        title: "Layout direset",
+        description: "Jangan lupa klik Simpan ke Database untuk menerapkan.",
+      });
+      return;
     }
+    if (!confirm("Reset ke layout default? Perubahan lokal akan hilang.")) return;
+    clearSeatsStorage();
+    setSeats(DEFAULT_HIACE_SEATS);
     setSelectedId(null);
     toast({ title: "Layout direset" });
   };
