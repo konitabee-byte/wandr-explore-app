@@ -48,13 +48,16 @@ export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setTimeout(() => loadProfile(session.user), 0);
+        setIsLoading(true);
+        setTimeout(() => {
+          loadProfile(session.user).finally(() => setIsLoading(false));
+        }, 0);
       } else {
         setUser(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
