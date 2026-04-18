@@ -105,7 +105,7 @@ const SeatEditor = ({ seats, selectedId, onSelect, onMove, baseImageUrl, disable
         </div>
       )}
 
-      {seats.map((seat) => {
+      {ready && seats.map((seat) => {
         const isSelected = selectedId === seat.id;
         const isDragging = draggingId === seat.id;
         const isOccupied = seat.status === "occupied";
